@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "TedSub",
+  "version": "1.0.0",
+  "description": "Modify color and size of subtitle on ted.com",
+  "permissions": [
+    "activeTab",
+    "declarativeContent",
+    "storage",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "background.js"
+      ]
+    }
+  ],
+  "browser_action": {
+    "default_title": "TedSub options",
+    "default_popup": "popup.html"
+  }
+}
