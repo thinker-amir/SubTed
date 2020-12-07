@@ -1,31 +1,48 @@
 let saveButton = document.getElementById('apply');
 let subtitleBackgroundAlphaRange = document.getElementById('subtitleBackgroundAlpha');
+const DEFAULT_DATA = {
+    "fontSize": 36,
+    "subtitleColor": "#f6c100",
+    "subtitleBackground": "#000000",
+    "subtitleBackgroundAlpha": 0.5
+}
 
 init();
 
-function init() {
-    appendFontSizeSuggestion();
-    subtitleBackgroundAlphaRange.value = 0.5
+async function init() {
+    saveButton.onclick = async function () {
+        const config = storeStyles();
+        await sendToBackground(config.styles);
+    }
+    subtitleBackgroundAlphaRange.onchange = updateBackgroundColorInputOpacity;
+    const styles = await retriveStyles() || DEFAULT_DATA;
+    appendOptionsToFontSizeSelector(parseInt(styles.fontSize));
+    setColorOptions(styles);
 }
 
-function appendFontSizeSuggestion() {
+function setColorOptions(styles) {
+    setElementValueById("subtitleColor", styles.subtitleColor)
+    setElementValueById("subtitleBackground", styles.subtitleBackground)
+    setElementValueById("subtitleBackgroundAlpha", styles.subtitleBackgroundAlpha)
+    updateBackgroundColorInputOpacity();
+}
+
+function createOptionElement(item, selected) {
+    let option = document.createElement("option");
+    option.text = item;
+    if (item === selected)
+        option.selected = true;
+    return option;
+}
+
+function appendOptionsToFontSizeSelector(selected) {
     const dataList = document.getElementById("fontSize");
-    const fontSizes = [18, 24, 30, 36, 48, 60, 72, 96]
-    fontSizes.forEach(item => {
-        let option = document.createElement("option");
-        option.text = item
-        dataList.appendChild(option)
-    })
-
+    const fontSizes = [18, 24, 30, 36, 48, 60, 72, 96];
+    fontSizes.forEach(item => dataList.appendChild(createOptionElement(item, selected)))
 }
 
-subtitleBackgroundAlphaRange.onchange = function () {
+function updateBackgroundColorInputOpacity() {
     document.getElementById('subtitleBackground').style.opacity = subtitleBackgroundAlphaRange.value;
-};
-
-saveButton.onclick = async function () {
-    const config = storeStyles();
-    await sendToBackground(config.styles);
 }
 
 function storeStyles() {
@@ -41,8 +58,20 @@ function storeStyles() {
     return data;
 }
 
+function retriveStyles() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get('styles', function (data) {
+            resolve(data["styles"]);
+        });
+    })
+}
+
 function getElementValueById(id) {
     return document.getElementById(id).value;
+}
+
+function setElementValueById(id, value) {
+    document.getElementById(id).value = value;
 }
 
 function sendToBackground(styles) {
