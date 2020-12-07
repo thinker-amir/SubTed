@@ -1,3 +1,7 @@
-body{
+body {
     width: 250px;
+}
+
+#resetToDefault {
+    padding: 5px 0;
 }

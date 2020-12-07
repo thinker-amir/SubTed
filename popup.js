@@ -1,4 +1,5 @@
-let saveButton = document.getElementById('apply');
+let saveElement = document.getElementById('apply');
+let resetToDefaultElement = document.getElementById('resetToDefault');
 let subtitleBackgroundAlphaRange = document.getElementById('subtitleBackgroundAlpha');
 const DEFAULT_DATA = {
     "fontSize": 36,
@@ -7,14 +8,21 @@ const DEFAULT_DATA = {
     "subtitleBackgroundAlpha": 0.5
 }
 
+saveElement.onclick = async function () {
+    const config = storeStyles();
+    await sendToBackground(config.styles);
+}
+
+resetToDefaultElement.onclick = async function () {
+    removeStyles();
+    init();
+}
+
+subtitleBackgroundAlphaRange.onchange = updateBackgroundColorInputOpacity;
+
 init();
 
 async function init() {
-    saveButton.onclick = async function () {
-        const config = storeStyles();
-        await sendToBackground(config.styles);
-    }
-    subtitleBackgroundAlphaRange.onchange = updateBackgroundColorInputOpacity;
     const styles = await retriveStyles() || DEFAULT_DATA;
     appendOptionsToFontSizeSelector(parseInt(styles.fontSize));
     setColorOptions(styles);
@@ -64,6 +72,10 @@ function retriveStyles() {
             resolve(data["styles"]);
         });
     })
+}
+
+function removeStyles() {
+    chrome.storage.sync.remove("styles");
 }
 
 function getElementValueById(id) {
